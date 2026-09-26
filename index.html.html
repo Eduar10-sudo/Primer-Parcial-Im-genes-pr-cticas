@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Primer Parcial — Miembro Superior e Inferior</title>
+<style>
+:root{
+  --bone:#ece3d2; --bone2:#d8c9a8; --ink:#2a1f1a; --maroon:#7a2e2e; --maroon-d:#5a1f1f;
+  --navy:#1f2d3d; --paper:#faf6ef; --card:#fffdf8; --good:#3f7d4f; --bad:#a4382f;
+  --muted:#8a7a63;
+  background:var(--paper); color:var(--ink);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#1b1613; --ink:#ece3d2; --card:#241d18; --bone:#3a2f27; --bone2:#4a3c30; --muted:#a99a83;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1b1613; --ink:#ece3d2; --card:#241d18; --bone:#3a2f27; --bone2:#4a3c30; --muted:#a99a83;
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+body{
+  margin:0; font-family:Georgia,'Iowan Old Style',serif; background:var(--paper); color:var(--ink);
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  min-height:100%;
+}
+header{
+  padding:1.1rem 1.2rem .8rem; border-bottom:2px solid var(--maroon);
+  display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:.4rem;
+}
+header h1{font-size:1.25rem; margin:0; letter-spacing:.2px;}
+header span{font-size:.78rem; color:var(--muted); font-family:system-ui,sans-serif;}
+nav{display:flex; gap:.4rem; padding:.7rem 1.2rem; flex-wrap:wrap; background:var(--bone); border-bottom:1px solid var(--bone2);}
+nav button{
+  font-family:system-ui,sans-serif; font-size:.85rem; padding:.5rem .9rem; border-radius:8px;
+  border:1px solid var(--bone2); background:var(--card); color:var(--ink); cursor:pointer;
+}
+nav button.active{background:var(--maroon); color:#fdf6ee; border-color:var(--maroon);}
+.wrap{max-width:640px; margin:0 auto; padding:1rem 1.1rem 3rem;}
+select{
+  width:100%; font-family:system-ui,sans-serif; font-size:.95rem; padding:.6rem .7rem; margin-bottom:1rem;
+  border-radius:8px; border:1px solid var(--bone2); background:var(--card); color:var(--ink);
+}
+.count{font-family:system-ui,sans-serif; font-size:.78rem; color:var(--muted); margin-bottom:.6rem;}
+
+/* Flashcards */
+.card{
+  background:var(--card); border:1px solid var(--bone2); border-radius:14px; min-height:220px;
+  display:flex; align-items:center; justify-content:center; text-align:center; padding:1.6rem;
+  cursor:pointer; box-shadow:0 2px 0 var(--bone2); position:relative;
+}
+.card .tag{position:absolute; top:.7rem; left:.9rem; font-family:system-ui,sans-serif; font-size:.7rem; color:var(--muted);}
+.card p{font-size:1.15rem; line-height:1.5; margin:0;}
+.card.answer p{font-size:1rem; color:var(--maroon-d); font-family:system-ui,sans-serif;}
+.rowbtns{display:flex; gap:.6rem; margin-top:1rem; font-family:system-ui,sans-serif;}
+.rowbtns button{
+  flex:1; padding:.7rem; border-radius:8px; border:1px solid var(--bone2); background:var(--bone);
+  color:var(--ink); font-size:.9rem; cursor:pointer;
+}
+.rowbtns button.primary{background:var(--navy); color:#fff; border-color:var(--navy);}
+
+/* Quiz */
+.qbox{background:var(--card); border:1px solid var(--bone2); border-radius:14px; padding:1.3rem;}
+.qbox h3{font-size:1.05rem; margin:0 0 1rem; line-height:1.4;}
+.opt{
+  display:block; width:100%; text-align:left; font-family:system-ui,sans-serif; font-size:.92rem;
+  padding:.7rem .8rem; margin-bottom:.55rem; border-radius:9px; border:1px solid var(--bone2);
+  background:var(--paper); color:var(--ink); cursor:pointer;
+}
+.opt.correct{background:var(--good); border-color:var(--good); color:#fff;}
+.opt.wrong{background:var(--bad); border-color:var(--bad); color:#fff;}
+.score{font-family:system-ui,sans-serif; font-size:.85rem; color:var(--muted); margin-bottom:.8rem;}
+.next{margin-top:.6rem; padding:.7rem; width:100%; border-radius:9px; border:none; background:var(--maroon);
+  color:#fff; font-family:system-ui,sans-serif; font-size:.92rem; cursor:pointer;}
+
+/* Match */
+.matchgrid{display:grid; grid-template-columns:1fr 1fr; gap:.5rem;}
+.mitem{
+  font-family:system-ui,sans-serif; font-size:.82rem; padding:.6rem .55rem; border-radius:8px;
+  border:1px solid var(--bone2); background:var(--card); cursor:pointer; line-height:1.3; min-height:3.2em;
+  display:flex; align-items:center;
+}
+.mitem.sel{border-color:var(--navy); box-shadow:inset 0 0 0 2px var(--navy);}
+.mitem.done{background:var(--good); color:#fff; border-color:var(--good); cursor:default; opacity:.85;}
+.mitem.bad{animation:shake .3s;}
+@keyframes shake{25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+.win{font-family:system-ui,sans-serif; text-align:center; padding:2rem 1rem; color:var(--good); font-size:1rem;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Primer Parcial — Imágenes prácticas</h1>
+  <span>Osteología y disección · miembro superior e inferior</span>
+</header>
+<nav id="modeNav"></nav>
+<div class="wrap">
+  <select id="topicSel"></select>
+  <div class="count" id="count"></div>
+  <div id="view"></div>
+</div>
+
+<script>
+const DATA = [
+["Clavícula","Articulación acromioclavicular","Clavícula + acromion de la escápula; sinovial plana; permite deslizamiento y rotación"],
+["Clavícula","Articulación esternoclavicular","Esternón + 1ª costilla + clavícula; sinovial en silla de montar (tipo sellar)"],
+["Clavícula","Extremidad esternal","Inserción del m. esternocleidomastoideo"],
+["Clavícula","Extremidad acromial","Se articula con el acromion; ahí insertan m. trapecio (arriba) y m. deltoides (abajo)"],
+["Clavícula","Ligamento costoclavicular","Une la clavícula a la 1ª costilla, en la impresión del ligamento costoclavicular"],
+["Clavícula","Ligamentos conoide y trapezoide","Unen la apófisis coracoides a la clavícula, en el tubérculo conoideo y la línea trapezoidea"],
+["Clavícula","Surco para el subclavio","Aloja al m. subclavio en la cara inferior del cuerpo de la clavícula"],
+["Escápula","Fosa subescapular","Cara costal (anterior) de la escápula; origen del m. subescapular"],
+["Escápula","Fosa supraespinosa","Origen del m. supraespinoso"],
+["Escápula","Fosa infraespinosa","Origen del m. infraespinoso"],
+["Escápula","Apófisis coracoides","Origen del m. coracobraquial y cabeza corta del bíceps; inserción del m. pectoral menor"],
+["Escápula","Cavidad glenoidea","Se articula con la cabeza del húmero; articulación glenohumeral, sinovial esferoidea (enartrosis)"],
+["Escápula","Tubérculo infraglenoideo","Origen de la cabeza larga del m. tríceps braquial"],
+["Escápula","Tubérculo supraglenoideo","Origen de la cabeza larga del m. bíceps braquial"],
+["Escápula","Nervio supraescapular","Pasa por la escotadura de la escápula, bajo el ligamento transverso"],
+["Escápula","Espina de la escápula","Divide la fosa supra e infraespinosa; inserción del trapecio y origen del deltoides"],
+["Húmero","Tubérculo mayor","Inserción de supraespinoso, infraespinoso y redondo menor"],
+["Húmero","Tubérculo menor","Inserción del m. subescapular"],
+["Húmero","Surco intertubercular","Corredera bicipital; aloja el tendón de la cabeza larga del m. bíceps braquial"],
+["Húmero","Tuberosidad deltoidea","Inserción del m. deltoides"],
+["Húmero","Epicóndilo medial","Origen común de los músculos flexores del antebrazo; surco para el nervio cubital"],
+["Húmero","Epicóndilo lateral","Origen común de los músculos extensores del antebrazo"],
+["Húmero","Surco para el nervio radial","En la cara posterior del cuerpo, entre el m. braquial y el tríceps"],
+["Húmero","Fosas coronoidea, radial y olecraneana","Alojan la apófisis coronoides, cabeza del radio y olécranon al flexionar/extender el codo"],
+["Húmero","Cuello quirúrgico","Sitio frecuente de fractura; en relación con el nervio axilar"],
+["Cúbito y radio","Apófisis coronoides","Del cúbito; se articula con la tróclea humeral; inserción del m. braquial"],
+["Cúbito y radio","Olécranon","Del cúbito; inserción del tendón del m. tríceps braquial"],
+["Cúbito y radio","Escotadura radial","Del cúbito; se articula con la cabeza del radio"],
+["Cúbito y radio","Tuberosidad del radio","Inserción del tendón del m. bíceps braquial"],
+["Cúbito y radio","Cabeza del radio","Se articula con el capítulo del húmero"],
+["Cúbito y radio","Apófisis estiloides del radio","Se articula con el escafoides; más distal que la del cúbito"],
+["Cúbito y radio","Apófisis estiloides del cúbito","Referencia ósea en la cara medial de la muñeca"],
+["Mano","Huesos carpianos, fila proximal","Escafoides, semilunar, piramidal y pisiforme"],
+["Mano","Huesos carpianos, fila distal","Trapecio, trapezoide, grande y ganchoso"],
+["Mano","Articulaciones metacarpofalángicas","Condíleas (elipsoideas), biaxiales: flexión, extensión, abducción, aducción y circunducción"],
+["Hombro: espacios","Triángulo omotricipital","Límites: redondo menor, redondo mayor y tríceps; contenido: arteria circunfleja de la escápula"],
+["Hombro: espacios","Cuadrilátero humerotricipital","Límites: redondos, tríceps y húmero; contenido: nervio axilar y arteria circunfleja humeral posterior"],
+["Hombro: espacios","Triángulo humerotricipital","Límites: redondo mayor, tríceps y húmero; contenido: arteria braquial profunda y nervio radial"],
+["Plexo braquial","Troncos del plexo braquial","Superior, medio e inferior, formados por las raíces C5-T1"],
+["Plexo braquial","Nervio musculocutáneo","Inerva los músculos del compartimento anterior del brazo (bíceps, braquial, coracobraquial)"],
+["Plexo braquial","Nervio axilar","Rodea el cuello quirúrgico del húmero; inerva al deltoides y al redondo menor"],
+["Plexo braquial","Nervio radial","Inerva al tríceps braquial; recorre el surco para el nervio radial"],
+["Plexo braquial","Nervio mediano","Acompaña a la arteria braquial en el brazo, sin dar ramas ahí"],
+["Plexo braquial","Nervio cubital","Pasa por detrás del epicóndilo medial del húmero"],
+["Plexo braquial","Arteria axilar","Continúa a la arteria subclavia; ramas: torácica superior, toracoacromial, torácica lateral, subescapular, circunfleja humeral anterior y posterior"],
+["Antebrazo","Compartimento flexor","Pronador redondo, flexor radial del carpo, palmar largo, flexor cubital del carpo, flexor superficial y profundo de los dedos, flexor largo del pulgar, pronador cuadrado"],
+["Antebrazo","Compartimento extensor","Braquiorradial, extensores radiales del carpo, extensor de los dedos, extensor del meñique, extensor cubital del carpo, supinador, abductor largo y extensores del pulgar"],
+["Antebrazo","Retináculo flexor","Techo del túnel del carpo, por donde pasan los tendones flexores y el nervio mediano"],
+["Antebrazo","Tabaquera anatómica","Formada por el abductor largo y extensor corto del pulgar (borde radial) y el extensor largo del pulgar (borde cubital)"],
+["Coxal","Acetábulo","Se articula con la cabeza del fémur; revestido de cartílago hialino, con fosa acetabular no articular"],
+["Coxal","Espina ilíaca anterosuperior","Origen del m. sartorio y del ligamento inguinal"],
+["Coxal","Espina ilíaca anteroinferior","Origen de la cabeza directa del m. recto femoral"],
+["Coxal","Escotadura ciática mayor","Paso del nervio ciático y del nervio pudendo"],
+["Coxal","Escotadura ciática menor","Paso de vasos y nervios hacia el periné"],
+["Coxal","Articulación sacroilíaca","Sacro + ilion; sinovial plana; clave para la estabilidad en la bipedestación"],
+["Coxal","Foramen obturador","Delimitado por las ramas del pubis y del isquion"],
+["Fémur","Trocánter mayor","Inserción del glúteo medio y del vasto lateral"],
+["Fémur","Trocánter menor","Inserción del m. iliopsoas"],
+["Fémur","Línea áspera","Inserción de los músculos aductores; se continúa arriba con la línea pectínea"],
+["Fémur","Cóndilos y epicóndilos","Se articulan con la tibia; el tubérculo del aductor está en el epicóndilo medial"],
+["Fémur","Fosita de la cabeza femoral","Inserción del ligamento redondo de la cadera"],
+["Tibia y peroné","Tuberosidad tibial","Inserción del ligamento rotuliano"],
+["Tibia y peroné","Pata de ganso","Inserción de sartorio, grácil y semitendinoso en la cara medial de la tibia"],
+["Tibia y peroné","Maléolo medial","Extremo distal de la tibia"],
+["Tibia y peroné","Maléolo lateral","Extremo distal del peroné; llega más distal que el maléolo medial"],
+["Tibia y peroné","Membrana interósea de la pierna","Une la tibia y el peroné; amplía la superficie de inserción muscular"],
+["Rótula","Base de la rótula","Inserción del tendón del m. cuádriceps femoral"],
+["Rótula","Vértice de la rótula","Inserción del ligamento rotuliano"],
+["Pie","Astrágalo","Único hueso del pie que se articula con la pierna (tibia y peroné)"],
+["Pie","Calcáneo","Hueso más grande del tarso; sitio frecuente de fractura"],
+["Pie","Articulación talocrural (tobillo)","Sinovial, uniaxial, tipo trocleal; dorsiflexión y flexión plantar"],
+["Pie","Articulación subastragalina","Astrágalo-calcáneo; sinovial plana; inversión y eversión del pie"],
+["Pie","Articulación astrágalo-calcáneo-navicular","Sinovial esferoidea, reforzada por el ligamento calcaneonavicular plantar; deslizamiento y rotación"],
+["Muslo y glúteo","Cuádriceps femoral","Recto anterior, vasto medial, vasto lateral y vasto intermedio"],
+["Muslo y glúteo","Triángulo femoral (de Scarpa)","De lateral a medial contiene: nervio, arteria y vena femoral"],
+["Muslo y glúteo","Músculos de la pata de ganso","Sartorio, grácil y semitendinoso"],
+["Muslo y glúteo","Isquiotibiales","Bíceps femoral, semitendinoso y semimembranoso"],
+["Muslo y glúteo","Nervio ciático","Se divide en nervio tibial y nervio peroneo común"],
+["Muslo y glúteo","Músculo piramidal","Referencia para el paso del nervio ciático bajo el glúteo mayor"],
+["Poplíteo y pierna","Arteria poplítea","Continuación de la arteria femoral tras pasar por el canal de los aductores"],
+["Poplíteo y pierna","Compartimento posterior de la pierna","Gastrocnemio, sóleo y plantar delgado (capa superficial)"],
+["Poplíteo y pierna","Compartimento anterior de la pierna","Tibial anterior, extensor largo de los dedos, extensor largo del dedo gordo"],
+["Poplíteo y pierna","Compartimento lateral de la pierna","Peroneo largo y peroneo corto"]
+];
+
+const topics = ["Todos", ...new Set(DATA.map(d=>d[0]))];
+const sel = document.getElementById('topicSel');
+topics.forEach(t=>{const o=document.createElement('option'); o.value=t; o.textContent=t; sel.appendChild(o);});
+
+let mode = 'flash';
+let deck = [];
+let idx = 0, showAns=false;
+let quizScore=0, quizTotal=0, quizCur=null, quizLocked=false;
+let matchPairs=[], matchSelTerm=null, matchSelDef=null, matchDone=0;
+
+function currentData(){
+  const t = sel.value;
+  return t==='Todos' ? DATA.slice() : DATA.filter(d=>d[0]===t);
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+const modes = [['flash','Flashcards'],['quiz','Quiz'],['match','Relacionar']];
+const navEl = document.getElementById('modeNav');
+modes.forEach(([id,label])=>{
+  const b=document.createElement('button'); b.textContent=label; b.onclick=()=>{mode=id; setup();};
+  b.dataset.id=id; navEl.appendChild(b);
+});
+
+sel.onchange = setup;
+
+function setup(){
+  [...navEl.children].forEach(b=>b.classList.toggle('active', b.dataset.id===mode));
+  deck = shuffle(currentData());
+  document.getElementById('count').textContent = deck.length + ' tema' + (deck.length===1?'':'s') + ' en esta selección';
+  if(mode==='flash'){ idx=0; showAns=false; renderFlash(); }
+  else if(mode==='quiz'){ quizScore=0; quizTotal=0; nextQuiz(); }
+  else { setupMatch(); }
+}
+
+function renderFlash(){
+  const v = document.getElementById('view');
+  if(deck.length===0){ v.innerHTML='<p>Elige un tema.</p>'; return; }
+  const [topic, term, def] = deck[idx];
+  v.innerHTML = `
+    <div class="card ${showAns?'answer':''}" id="flipcard">
+      <span class="tag">${topic} · ${idx+1}/${deck.length}</span>
+      <p>${showAns?def:term}</p>
+    </div>
+    <div class="rowbtns">
+      <button id="prevB">← Anterior</button>
+      <button class="primary" id="flipB">${showAns?'Ver término':'Ver respuesta'}</button>
+      <button id="nextB">Siguiente →</button>
+    </div>`;
+  document.getElementById('flipcard').onclick=()=>{showAns=!showAns; renderFlash();};
+  document.getElementById('flipB').onclick=(e)=>{e.stopPropagation(); showAns=!showAns; renderFlash();};
+  document.getElementById('prevB').onclick=(e)=>{e.stopPropagation(); idx=(idx-1+deck.length)%deck.length; showAns=false; renderFlash();};
+  document.getElementById('nextB').onclick=(e)=>{e.stopPropagation(); idx=(idx+1)%deck.length; showAns=false; renderFlash();};
+}
+
+function nextQuiz(){
+  quizLocked=false;
+  if(deck.length<4){ document.getElementById('view').innerHTML='<p>Elige "Todos" o un tema con al menos 4 estructuras para el quiz.</p>'; return; }
+  const item = deck[Math.floor(Math.random()*deck.length)];
+  const pool = currentData().filter(d=>d[1]!==item[1]);
+  shuffle(pool);
+  const opts = shuffle([item[2], ...pool.slice(0,3).map(p=>p[2])]);
+  quizCur = {item, opts};
+  renderQuiz();
+}
+function renderQuiz(){
+  const v = document.getElementById('view');
+  const {item, opts} = quizCur;
+  v.innerHTML = `<div class="score">Puntaje: ${quizScore}/${quizTotal}</div>
+    <div class="qbox">
+      <h3>¿Qué corresponde a: <em>${item[1]}</em>? <span style="color:var(--muted);font-size:.8rem">(${item[0]})</span></h3>
+      <div id="opts"></div>
+      <button class="next" id="nextQ" style="display:none">Siguiente →</button>
+    </div>`;
+  const optsDiv = document.getElementById('opts');
+  opts.forEach(o=>{
+    const b=document.createElement('button'); b.className='opt'; b.textContent=o;
+    b.onclick=()=>{
+      if(quizLocked) return; quizLocked=true; quizTotal++;
+      const correct = o===item[2];
+      if(correct) quizScore++;
+      [...optsDiv.children].forEach(c=>{
+        if(c.textContent===item[2]) c.classList.add('correct');
+        else if(c===b) c.classList.add('wrong');
+      });
+      document.getElementById('nextQ').style.display='block';
+    };
+    optsDiv.appendChild(b);
+  });
+  document.getElementById('nextQ').onclick=nextQuiz;
+}
+
+function setupMatch(){
+  const pool = shuffle(currentData()).slice(0, Math.min(6, currentData().length));
+  matchPairs = pool; matchSelTerm=null; matchSelDef=null; matchDone=0;
+  renderMatch();
+}
+function renderMatch(){
+  const v = document.getElementById('view');
+  if(matchPairs.length===0){ v.innerHTML='<p>Elige un tema.</p>'; return; }
+  const terms = matchPairs.map((p,i)=>({i, txt:p[1]}));
+  const defs = shuffle(matchPairs.map((p,i)=>({i, txt:p[2]})).slice());
+  v.innerHTML = `<p style="font-family:system-ui,sans-serif;font-size:.85rem;color:var(--muted)">Toca un término y luego su definición correcta.</p>
+    <div class="matchgrid" id="terms"></div>
+    <div style="height:.6rem"></div>
+    <div class="matchgrid" id="defs"></div>`;
+  const tDiv=document.getElementById('terms'), dDiv=document.getElementById('defs');
+  terms.forEach(t=>{
+    const el=document.createElement('div'); el.className='mitem'; el.textContent=t.txt; el.dataset.i=t.i;
+    if(matchPairs[t.i].done) el.classList.add('done');
+    el.onclick=()=>{ if(matchPairs[t.i].done) return; matchSelTerm=t.i; renderMatch(); tryMatch(); };
+    if(matchSelTerm===t.i) el.classList.add('sel');
+    tDiv.appendChild(el);
+  });
+  defs.forEach(d=>{
+    const el=document.createElement('div'); el.className='mitem'; el.textContent=d.txt; el.dataset.i=d.i;
+    if(matchPairs[d.i].done) el.classList.add('done');
+    el.onclick=()=>{ if(matchPairs[d.i].done) return; matchSelDef=d.i; renderMatch(); tryMatch(); };
+    dDiv.appendChild(el);
+  });
+  if(matchDone===matchPairs.length){
+    v.innerHTML += `<div class="win">¡Completado! 🦴<br><button class="next" id="again" style="width:auto;padding:.6rem 1.2rem;margin-top:.6rem">Otra ronda</button></div>`;
+    document.getElementById('again').onclick=setupMatch;
+  }
+}
+function tryMatch(){
+  if(matchSelTerm===null || matchSelDef===null) return;
+  if(matchSelTerm===matchSelDef){
+    matchPairs[matchSelTerm].done=true; matchDone++;
+    matchSelTerm=null; matchSelDef=null; renderMatch();
+  } else {
+    const t=matchSelTerm, d=matchSelDef;
+    matchSelTerm=null; matchSelDef=null;
+    renderMatch();
+    const els=[...document.querySelectorAll('.mitem')];
+    els.forEach(el=>{ if((el.parentElement.id==='terms'&&+el.dataset.i===t)||(el.parentElement.id==='defs'&&+el.dataset.i===d)){ el.classList.add('bad'); setTimeout(()=>el.classList.remove('bad'),300);} });
+  }
+}
+
+setup();
+</script>
+</body>
+</html>
